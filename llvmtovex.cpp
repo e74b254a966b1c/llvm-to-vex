@@ -38,11 +38,6 @@ namespace {
             return newIRTemp(irsb->tyenv, ty);
         }
 
-        static IRExpr *binop(IROp op, IRExpr *a1, IRExpr *a2)
-        {
-            return IRExpr_Binop(op, a1, a2);
-        }
-
         static IROp mkSizedOp(IRType ty, IROp op8)
         {
             int adj;
@@ -170,11 +165,20 @@ namespace {
                 } else if (isa<BinaryOperator>(V)) {
                     errs() << "binary ";
 
+                    IROp op = Iop_INVALID;
+
+                    Value *opd1 = I.getOperand(0);
+                    Value *opd2 = I.getOperand(1);
+
+                    pair<IRExpr *, IRTemp>parsedOpd1 = parseVal(*opd1, vl, level + 1);
+                    pair<IRExpr *, IRTemp>parsedOpd2 = parseVal(*opd2, vl, level + 1);
+
                     switch (I.getOpcode()) {
                     // Standard binary operators...
                     case Instruction::Add:
                         errs() << "add ";
 
+                        op = VEXLib::mkSizedOp(type, Iop_Add8);
                         break;
                     case Instruction::FAdd:
                         errs() << "fadd ";
@@ -183,6 +187,7 @@ namespace {
                     case Instruction::Sub:
                         errs() << "sub ";
 
+                        op = VEXLib::mkSizedOp(type, Iop_Sub8);
                         break;
                     case Instruction::FSub:
                         errs() << "fsub ";
@@ -191,6 +196,7 @@ namespace {
                     case Instruction::Mul:
                         errs() << "mul ";
 
+                        op = VEXLib::mkSizedOp(type, Iop_Mul8);
                         break;
                     case Instruction::FMul:
                         errs() << "fmul ";
@@ -246,6 +252,8 @@ namespace {
 
                         break;
                     }
+
+                    expr = IRExpr_Binop(op, parsedOpd1.first, parsedOpd2.first);
                 }
             }
 
