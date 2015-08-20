@@ -70,7 +70,7 @@ namespace {
     };
 
     struct Hello : public FunctionPass {
-        map<Value *, pair<IRExpr *, IRTemp> > parsedInst;
+        map<Value *, IRExpr *> parsedInst;
         static char ID;
 
         Hello() : FunctionPass(ID) {}
@@ -99,12 +99,12 @@ namespace {
             return type;
         }
 
-        pair<IRExpr *, IRTemp> parseVal(Value &V, VEXLib &vl, int level = 1) {
+        IRExpr *parseVal(Value &V, VEXLib &vl, int level = 1) {
             IRTemp res = IRTemp_INVALID;
             IRExpr *expr = 0;
             IRType type = parseVType(V);
 
-            map<Value *, pair<IRExpr *, IRTemp> >::iterator srchIt = parsedInst.find(&V);
+            map<Value *, IRExpr *>::iterator srchIt = parsedInst.find(&V);
             if (srchIt != parsedInst.end())
                 return srchIt->second;
 
@@ -155,12 +155,13 @@ namespace {
                     } else if (isa<LoadInst>(V)) {
                         errs() << "load ";
 
-                        pair<IRExpr *, IRTemp>parsedOpd = parseVal(*opd, vl, level + 1);
+                        IRExpr *parsedOpd = parseVal(*opd, vl, level + 1);
 
                         res = vl.newTemp(type);
                         //TODO what about big endian?
-                        expr = IRExpr_Load(Iend_LE, type, parsedOpd.first);
-                        vl.assign(res, expr);
+                        vl.assign(res,
+                                  IRExpr_Load(Iend_LE, type, parsedOpd));
+                        expr = IRExpr_RdTmp(res);
                     } else if (isa<VAArgInst>(V)) {
                         errs() << "vaarg ";
                     }
@@ -172,8 +173,8 @@ namespace {
                     Value *opd1 = I.getOperand(0);
                     Value *opd2 = I.getOperand(1);
 
-                    pair<IRExpr *, IRTemp>parsedOpd1 = parseVal(*opd1, vl, level + 1);
-                    pair<IRExpr *, IRTemp>parsedOpd2 = parseVal(*opd2, vl, level + 1);
+                    IRExpr *parsedOpd1 = parseVal(*opd1, vl, level + 1);
+                    IRExpr *parsedOpd2 = parseVal(*opd2, vl, level + 1);
 
                     switch (I.getOpcode()) {
                     // Standard binary operators...
@@ -262,14 +263,13 @@ namespace {
                     }
 
                     res = vl.newTemp(type);
-                    expr = IRExpr_Binop(op, parsedOpd1.first, parsedOpd2.first);
-                    vl.assign(res, expr);
+                    vl.assign(res, IRExpr_Binop(op, parsedOpd1, parsedOpd2));
+                    expr = IRExpr_RdTmp(res);
                 }
             }
 
-            pair<IRExpr *, IRTemp> exRes = make_pair(expr, res);
-            parsedInst[&V] = exRes;
-            return exRes;
+            parsedInst[&V] = expr;
+            return expr;
         }
 
         void transInstr(VEXLib &vl, Instruction  &I) {
