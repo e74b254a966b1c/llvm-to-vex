@@ -155,10 +155,12 @@ namespace {
                     } else if (isa<LoadInst>(V)) {
                         errs() << "load ";
 
-                        res = vl.newTemp(type);
                         pair<IRExpr *, IRTemp>parsedOpd = parseVal(*opd, vl, level + 1);
+
+                        res = vl.newTemp(type);
                         //TODO what about big endian?
                         expr = IRExpr_Load(Iend_LE, type, parsedOpd.first);
+                        vl.assign(res, expr);
                     } else if (isa<VAArgInst>(V)) {
                         errs() << "vaarg ";
                     }
@@ -230,30 +232,38 @@ namespace {
                     case Instruction::Shl:
                         errs() << "shl ";
 
+                        op = VEXLib::mkSizedOp(type, Iop_Shl8);
                         break;
                     case Instruction::LShr:
                         errs() << "lshl ";
 
+                        op = VEXLib::mkSizedOp(type, Iop_Shr8);
                         break;
                     case Instruction::AShr:
                         errs() << "ashr ";
 
+                        op = VEXLib::mkSizedOp(type, Iop_Sar8);
                         break;
                     case Instruction::And:
                         errs() << "and ";
 
+                        op = VEXLib::mkSizedOp(type, Iop_And8);
                         break;
                     case Instruction::Or:
                         errs() << "or ";
 
+                        op = VEXLib::mkSizedOp(type, Iop_Or8);
                         break;
                     case Instruction::Xor:
                         errs() << "xor ";
 
+                        op = VEXLib::mkSizedOp(type, Iop_Xor8);
                         break;
                     }
 
+                    res = vl.newTemp(type);
                     expr = IRExpr_Binop(op, parsedOpd1.first, parsedOpd2.first);
+                    vl.assign(res, expr);
                 }
             }
 
