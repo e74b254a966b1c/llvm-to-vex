@@ -10,6 +10,8 @@ extern "C" {
 #include "main_util.h"
 }
 
+#pragma clang diagnostic ignored "-Wswitch"
+
 using namespace llvm;
 using namespace std;
 
@@ -285,11 +287,39 @@ namespace {
                 } else if (isa<CmpInst>(V)) {
                     errs() << "cmp ";
 
+                    CmpInst &CmpI = (CmpInst &)V;
+                    IROp pred = Iop_INVALID;
+                    Value *opd1 = CmpI.getOperand(0);
+                    Value *opd2 = CmpI.getOperand(1);
+                    IRType cmpTy = parseVType(*opd1);
+                    IRExpr *parsedOpd1 = 0;
+                    IRExpr *parsedOpd2 = 0;
+
                     if (isa<ICmpInst>(V)) {
                         errs() << "int ";
+
+                        switch(CmpI.getPredicate()) {
+                            case CmpInst::ICMP_EQ:
+                                errs() << "eq ";
+
+                                pred = VEXLib::mkSizedOp(cmpTy, Iop_CmpEQ8);
+                                break;
+                            case CmpInst::ICMP_NE:
+                                errs() << "ne ";
+
+                                pred = VEXLib::mkSizedOp(cmpTy, Iop_CmpNE8);
+                                break;
+                        }
+
                     } else if (isa<FCmpInst>(V)) {
                         errs() << "float ";
                     }
+
+                    res = vl.newTemp(type);
+                    parsedOpd1 = parseVal(*opd1, vl, level + 1);
+                    parsedOpd2 = parseVal(*opd2, vl, level + 1);
+                    vl.assign(res, IRExpr_Binop(pred, parsedOpd1, parsedOpd2));
+                    expr = IRExpr_RdTmp(res);
                 } else if (isa<StoreInst>(V)) {
                     errs() << "store ";
                 }
