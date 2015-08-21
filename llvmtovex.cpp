@@ -100,6 +100,12 @@ namespace {
                     break;
                 }
                 break;
+            case Type::FloatTyID:
+                type = Ity_F32;
+                break;
+            case Type::DoubleTyID:
+                type = Ity_F64;
+                break;
             }
             return type;
         }
