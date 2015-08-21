@@ -328,6 +328,16 @@ namespace {
                     expr = IRExpr_RdTmp(res);
                 } else if (isa<StoreInst>(V)) {
                     errs() << "store ";
+
+                    Value *opd1 = I.getOperand(0);
+                    Value *opd2 = I.getOperand(1);
+                    IRExpr *addr = 0;
+                    IRExpr *data = 0;
+
+                    data = parseVal(*opd1, vl, level + 1);
+                    addr = parseVal(*opd2, vl, level + 1);
+                    //TODO what about big endian?
+                    vl.stmt(IRStmt_Store(Iend_LE, addr, data));
                 }
             }
 
