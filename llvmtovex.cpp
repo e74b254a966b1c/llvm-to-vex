@@ -209,6 +209,14 @@ namespace {
                     case Instruction::FAdd:
                         errs() << "fadd ";
 
+                        switch (type) {
+                        case Ity_F32:
+                            op = Iop_AddF32;
+                            break;
+                        case Ity_F64:
+                            op = Iop_AddF64;
+                            break;
+                        }
                         break;
                     case Instruction::Sub:
                         errs() << "sub ";
@@ -218,6 +226,14 @@ namespace {
                     case Instruction::FSub:
                         errs() << "fsub ";
 
+                        switch (type) {
+                        case Ity_F32:
+                            op = Iop_SubF32;
+                            break;
+                        case Ity_F64:
+                            op = Iop_SubF64;
+                            break;
+                        }
                         break;
                     case Instruction::Mul:
                         errs() << "mul ";
@@ -227,6 +243,14 @@ namespace {
                     case Instruction::FMul:
                         errs() << "fmul ";
 
+                        switch (type) {
+                        case Ity_F32:
+                            op = Iop_MulF32;
+                            break;
+                        case Ity_F64:
+                            op = Iop_MulF64;
+                            break;
+                        }
                         break;
                     case Instruction::UDiv:
                         errs() << "udiv ";
