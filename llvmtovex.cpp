@@ -81,6 +81,9 @@ namespace {
             switch (t->getTypeID()) {
             case Type::IntegerTyID:
                 switch (t->getPrimitiveSizeInBits()) {
+                case 1:
+                    type = Ity_I1;
+                    break;
                 case 8:
                     type = Ity_I8;
                     break;
@@ -122,16 +125,29 @@ namespace {
                     uint64_t valInt = (CI.getZExtValue());
 
                     switch (type) {
+                    case Ity_I1:
+                        errs() << "1 ";
+
+                        expr = IRExpr_Const(IRConst_U1((Bool)valInt));
+                        break;
                     case Ity_I8:
+                        errs() << "8 ";
+
                         expr = IRExpr_Const(IRConst_U8((uint8_t)valInt));
                         break;
                     case Ity_I16:
+                        errs() << "16 ";
+
                         expr = IRExpr_Const(IRConst_U16((uint16_t)valInt));
                         break;
                     case Ity_I32:
+                        errs() << "32 ";
+
                         expr = IRExpr_Const(IRConst_U32((uint32_t)valInt));
                         break;
                     case Ity_I64:
+                        errs() << "64 ";
+
                         expr = IRExpr_Const(IRConst_U64(valInt));
                         break;
                     }
@@ -145,6 +161,7 @@ namespace {
                     errs() << "unary ";
 
                     Value *opd = I.getOperand(0);
+                    IRExpr *parsedOpd = 0;
 
                     if (isa<AllocaInst>(V)) {
                         errs() << "alloca ";
@@ -155,8 +172,7 @@ namespace {
                     } else if (isa<LoadInst>(V)) {
                         errs() << "load ";
 
-                        IRExpr *parsedOpd = parseVal(*opd, vl, level + 1);
-
+                        parsedOpd = parseVal(*opd, vl, level + 1);
                         res = vl.newTemp(type);
                         //TODO what about big endian?
                         vl.assign(res,
@@ -169,12 +185,10 @@ namespace {
                     errs() << "binary ";
 
                     IROp op = Iop_INVALID;
-
                     Value *opd1 = I.getOperand(0);
                     Value *opd2 = I.getOperand(1);
-
-                    IRExpr *parsedOpd1 = parseVal(*opd1, vl, level + 1);
-                    IRExpr *parsedOpd2 = parseVal(*opd2, vl, level + 1);
+                    IRExpr *parsedOpd1 = 0;
+                    IRExpr *parsedOpd2 = 0;
 
                     switch (I.getOpcode()) {
                     // Standard binary operators...
@@ -263,6 +277,8 @@ namespace {
                     }
 
                     res = vl.newTemp(type);
+                    parsedOpd1 = parseVal(*opd1, vl, level + 1);
+                    parsedOpd2 = parseVal(*opd2, vl, level + 1);
                     vl.assign(res, IRExpr_Binop(op, parsedOpd1, parsedOpd2));
                     expr = IRExpr_RdTmp(res);
                 }
