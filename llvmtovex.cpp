@@ -118,6 +118,7 @@ namespace {
 
             if (isa<Constant>(V)) {
                 errs() << "constant ";
+
                 if (isa<ConstantInt>(V)) {
                     errs() << "int ";
 
@@ -281,6 +282,16 @@ namespace {
                     parsedOpd2 = parseVal(*opd2, vl, level + 1);
                     vl.assign(res, IRExpr_Binop(op, parsedOpd1, parsedOpd2));
                     expr = IRExpr_RdTmp(res);
+                } else if (isa<CmpInst>(V)) {
+                    errs() << "cmp ";
+
+                    if (isa<ICmpInst>(V)) {
+                        errs() << "int ";
+                    } else if (isa<FCmpInst>(V)) {
+                        errs() << "float ";
+                    }
+                } else if (isa<StoreInst>(V)) {
+                    errs() << "store ";
                 }
             }
 
