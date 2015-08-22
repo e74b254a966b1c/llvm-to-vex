@@ -255,14 +255,38 @@ namespace {
                     case Instruction::UDiv:
                         errs() << "udiv ";
 
+                        switch (type) {
+                        case Ity_I32:
+                            op = Iop_DivU32;
+                            break;
+                        case Ity_I64:
+                            op = Iop_DivU64;
+                            break;
+                        }
                         break;
                     case Instruction::SDiv:
                         errs() << "sdiv ";
 
+                        switch (type) {
+                        case Ity_I32:
+                            op = Iop_DivS32;
+                            break;
+                        case Ity_I64:
+                            op = Iop_DivS64;
+                            break;
+                        }
                         break;
                     case Instruction::FDiv:
                         errs() << "fdiv ";
 
+                        switch (type) {
+                        case Ity_F32:
+                            op = Iop_DivF32;
+                            break;
+                        case Ity_F64:
+                            op = Iop_DivF64;
+                            break;
+                        }
                         break;
                     case Instruction::URem:
                         errs() << "urem ";
