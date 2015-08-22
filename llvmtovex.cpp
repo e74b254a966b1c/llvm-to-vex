@@ -430,11 +430,20 @@ namespace {
                     //TODO what about big endian?
                     vl.stmt(IRStmt_Store(Iend_LE, addr, data));
                 //StoreInst end
+                } else if (isa<TerminatorInst>(V)) {
+                    errs() << "terminator ";
+                //TerminatorInst end
+                } else if (isa<CallInst>(V)) {
+                    errs() << "call ";
+                //CallInst end
                 } else {
                     errs() << "Parse failed!\n";
                     vassert(false);
                 }
             //Instruction end
+            } else if (isa<Argument>(V)) {
+                errs() << "argument ";
+            //Argument end
             } else {
                 errs() << "Parse failed!\n";
                 vassert(false);
