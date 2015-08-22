@@ -159,8 +159,19 @@ namespace {
 
                         expr = IRExpr_Const(IRConst_U64(valInt));
                         break;
+                    default:
+                        errs() << "Parse failed!\n";
+                        vassert(false);
                     }
+                //ConstantInt end
+                } else if (isa<ConstantFP>(V)) {
+                    errs() << "float ";
+                //ConstantFP end
+                } else {
+                    errs() << "Parse failed!\n";
+                    vassert(false);
                 }
+            //Constant end
             } else if (isa<Instruction>(V)) {
                 errs() << "instruction ";
 
@@ -189,7 +200,11 @@ namespace {
                         expr = IRExpr_RdTmp(res);
                     } else if (isa<VAArgInst>(V)) {
                         errs() << "vaarg ";
+                    } else {
+                        errs() << "Parse failed!\n";
+                        vassert(false);
                     }
+                //UnaryInstruction end
                 } else if (isa<BinaryOperator>(V)) {
                     errs() << "binary ";
 
@@ -216,6 +231,9 @@ namespace {
                         case Ity_F64:
                             op = Iop_AddF64;
                             break;
+                        default:
+                            errs() << "Parse failed!\n";
+                            vassert(false);
                         }
                         break;
                     case Instruction::Sub:
@@ -233,6 +251,9 @@ namespace {
                         case Ity_F64:
                             op = Iop_SubF64;
                             break;
+                        default:
+                            errs() << "Parse failed!\n";
+                            vassert(false);
                         }
                         break;
                     case Instruction::Mul:
@@ -250,6 +271,9 @@ namespace {
                         case Ity_F64:
                             op = Iop_MulF64;
                             break;
+                        default:
+                            errs() << "Parse failed!\n";
+                            vassert(false);
                         }
                         break;
                     case Instruction::UDiv:
@@ -262,6 +286,9 @@ namespace {
                         case Ity_I64:
                             op = Iop_DivU64;
                             break;
+                        default:
+                            errs() << "Parse failed!\n";
+                            vassert(false);
                         }
                         break;
                     case Instruction::SDiv:
@@ -274,6 +301,9 @@ namespace {
                         case Ity_I64:
                             op = Iop_DivS64;
                             break;
+                        default:
+                            errs() << "Parse failed!\n";
+                            vassert(false);
                         }
                         break;
                     case Instruction::FDiv:
@@ -286,6 +316,9 @@ namespace {
                         case Ity_F64:
                             op = Iop_DivF64;
                             break;
+                        default:
+                            errs() << "Parse failed!\n";
+                            vassert(false);
                         }
                         break;
                     case Instruction::URem:
@@ -331,6 +364,9 @@ namespace {
 
                         op = VEXLib::mkSizedOp(type, Iop_Xor8);
                         break;
+                    default:
+                        errs() << "Parse failed!\n";
+                        vassert(false);
                     }
 
                     res = vl.newTemp(type);
@@ -338,6 +374,7 @@ namespace {
                     parsedOpd2 = parseVal(*opd2, vl, level + 1);
                     vl.assign(res, IRExpr_Binop(op, parsedOpd1, parsedOpd2));
                     expr = IRExpr_RdTmp(res);
+                //BinaryOperator end
                 } else if (isa<CmpInst>(V)) {
                     errs() << "cmp ";
 
@@ -363,10 +400,15 @@ namespace {
 
                                 pred = VEXLib::mkSizedOp(cmpTy, Iop_CmpNE8);
                                 break;
+                            default:
+                                errs() << "Parse failed!\n";
+                                vassert(false);
                         }
-
                     } else if (isa<FCmpInst>(V)) {
                         errs() << "float ";
+                    } else {
+                        errs() << "Parse failed!\n";
+                        vassert(false);
                     }
 
                     res = vl.newTemp(type);
@@ -374,6 +416,7 @@ namespace {
                     parsedOpd2 = parseVal(*opd2, vl, level + 1);
                     vl.assign(res, IRExpr_Binop(pred, parsedOpd1, parsedOpd2));
                     expr = IRExpr_RdTmp(res);
+                //CmpInst end
                 } else if (isa<StoreInst>(V)) {
                     errs() << "store ";
 
@@ -386,7 +429,15 @@ namespace {
                     addr = parseVal(*opd2, vl, level + 1);
                     //TODO what about big endian?
                     vl.stmt(IRStmt_Store(Iend_LE, addr, data));
+                //StoreInst end
+                } else {
+                    errs() << "Parse failed!\n";
+                    vassert(false);
                 }
+            //Instruction end
+            } else {
+                errs() << "Parse failed!\n";
+                vassert(false);
             }
 
             parsedInst[&V] = expr;
@@ -394,32 +445,9 @@ namespace {
         }
 
         void transInstr(VEXLib &vl, Instruction  &I) {
-            IRTemp res = IRTemp_INVALID;
-            IROp op = Iop_INVALID;
-            Value *opd1, *opd2;
-            IRType type = parseVType(I);
-
             errs() << "\n" << I ;
             parseVal(I, vl);
-
-            /*
-            switch (I.getOpcode()) {
-            case Instruction::Load:
-                parseVal(I, vl);
-                break;
-            case Instruction::Add:
-                opd1 = I.getOperand(0);
-                opd2 = I.getOperand(1);
-
-                parseVal(*opd1, vl);
-                parseVal(*opd2, vl);
-
-                res = vl.newTemp(type);
-                op = VEXLib::mkSizedOp(type, Iop_Add8);
-                //assign(res, binop(op,))
-                break;
-            }
-            */
+            errs() << "\n";
         }
 
         bool runOnFunction(Function &F) override {
