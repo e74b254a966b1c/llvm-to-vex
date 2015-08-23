@@ -382,6 +382,7 @@ namespace {
                     IROp pred = Iop_INVALID;
                     Value *opd1 = CmpI.getOperand(0);
                     Value *opd2 = CmpI.getOperand(1);
+                    Value *aux;
                     IRType cmpTy = parseVType(*opd1);
                     IRExpr *parsedOpd1 = 0;
                     IRExpr *parsedOpd2 = 0;
@@ -401,13 +402,12 @@ namespace {
                                 pred = VEXLib::mkSizedOp(cmpTy, Iop_CmpNE8);
                                 break;
                             case CmpInst::ICMP_UGT:
-                                errs() << "ugt ";
+                                errs() << "ugt --will be converted to ";
 
-                                break;
-                            case CmpInst::ICMP_UGE:
-                                errs() << "uge ";
-
-                                break;
+                                //Reverse operands because VEX doesn't have UGT
+                                aux = opd1;
+                                opd1 = opd2;
+                                opd2 = aux;
                             case CmpInst::ICMP_ULT:
                                 errs() << "ult ";
 
@@ -423,6 +423,13 @@ namespace {
                                     vassert(false);
                                 }
                                 break;
+                            case CmpInst::ICMP_UGE:
+                                errs() << "uge --will be converted to ";
+
+                                //Reverse operands because VEX doesn't have UGE
+                                aux = opd1;
+                                opd1 = opd2;
+                                opd2 = aux;
                             case CmpInst::ICMP_ULE:
                                 errs() << "ule ";
 
@@ -439,13 +446,12 @@ namespace {
                                 }
                                 break;
                             case CmpInst::ICMP_SGT:
-                                errs() << "sgt ";
+                                errs() << "sgt --will be converted to ";
 
-                                break;
-                            case CmpInst::ICMP_SGE:
-                                errs() << "sge ";
-
-                                break;
+                                //Reverse operands because VEX doesn't have SGT
+                                aux = opd1;
+                                opd1 = opd2;
+                                opd2 = aux;
                             case CmpInst::ICMP_SLT:
                                 errs() << "slt ";
 
@@ -461,6 +467,13 @@ namespace {
                                     vassert(false);
                                 }
                                 break;
+                            case CmpInst::ICMP_SGE:
+                                errs() << "sge --will be converted to ";
+
+                                //Reverse operands because VEX doesn't have SGE
+                                aux = opd1;
+                                opd1 = opd2;
+                                opd2 = aux;
                             case CmpInst::ICMP_SLE:
                                 errs() << "sle ";
 
