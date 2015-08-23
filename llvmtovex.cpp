@@ -186,7 +186,38 @@ namespace {
                     if (isa<AllocaInst>(V)) {
                         errs() << "alloca ";
                     } else if (isa<CastInst>(V)) {
-                        errs() << "cast" ;
+                        errs() << "cast ";
+
+                        if (isa<AddrSpaceCastInst>(V)) {
+                            errs() << "addr space ";
+                        } else if (isa<BitCastInst>(V)) {
+                            errs() << "bit ";
+                        } else if (isa<FPExtInst>(V)) {
+                            errs() << "fp ext ";
+                        } else if (isa<FPToSIInst>(V)) {
+                            errs() << "fp to si ";
+                        } else if (isa<FPToUIInst>(V)) {
+                            errs() << "fp to ui ";
+                        } else if (isa<FPTruncInst>(V)) {
+                            errs() << "fp trunc ";
+                        } else if (isa<IntToPtrInst>(V)) {
+                            errs() << "int to ptr ";
+                        } else if (isa<PtrToIntInst>(V)) {
+                            errs() << "ptr to int ";
+                        } else if (isa<SExtInst>(V)) {
+                            errs() << "s ext ";
+                        } else if (isa<SIToFPInst>(V)) {
+                            errs() << "si to fp ";
+                        } else if (isa<TruncInst>(V)) {
+                            errs() << "trunc ";
+                        } else if (isa<UIToFPInst>(V)) {
+                            errs() << "ui to fp ";
+                        } else if (isa<ZExtInst>(V)) {
+                            errs() << "z ext";
+                        } else {
+                            errs() << "Parse failed!\n";
+                            vassert(false);
+                        }
                     } else if (isa<ExtractValueInst>(V)) {
                         errs() << "extract ";
                     } else if (isa<LoadInst>(V)) {
