@@ -432,6 +432,25 @@ namespace {
                 //StoreInst end
                 } else if (isa<TerminatorInst>(V)) {
                     errs() << "terminator ";
+
+                    if (isa<BranchInst>(V)) {
+                        errs() << "branch ";
+                    } else if (isa<IndirectBrInst>(V)) {
+                        errs() << "indirect br ";
+                    } else if (isa<InvokeInst>(V)) {
+                        errs() << "invoke ";
+                    } else if (isa<ResumeInst>(V)) {
+                        errs() << "resume ";
+                    } else if (isa<ReturnInst>(V)) {
+                        errs() << "return ";
+                    } else if (isa<SwitchInst>(V)) {
+                        errs() << "switch ";
+                    } else if (isa<UnreachableInst>(V)) {
+                        errs() << "unreachable ";
+                    } else {
+                        errs() << "Parse failed!\n";
+                        vassert(false);
+                    }
                 //TerminatorInst end
                 } else if (isa<CallInst>(V)) {
                     errs() << "call ";
