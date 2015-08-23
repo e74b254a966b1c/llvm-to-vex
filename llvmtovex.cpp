@@ -400,6 +400,82 @@ namespace {
 
                                 pred = VEXLib::mkSizedOp(cmpTy, Iop_CmpNE8);
                                 break;
+                            case CmpInst::ICMP_UGT:
+                                errs() << "ugt ";
+
+                                break;
+                            case CmpInst::ICMP_UGE:
+                                errs() << "uge ";
+
+                                break;
+                            case CmpInst::ICMP_ULT:
+                                errs() << "ult ";
+
+                                switch (cmpTy) {
+                                case Ity_I32:
+                                    pred = Iop_CmpLT32U;
+                                    break;
+                                case Ity_I64:
+                                    pred = Iop_CmpLT64U;
+                                    break;
+                                default:
+                                    errs() << "Parse failed!\n";
+                                    vassert(false);
+                                }
+                                break;
+                            case CmpInst::ICMP_ULE:
+                                errs() << "ule ";
+
+                                switch (cmpTy) {
+                                case Ity_I32:
+                                    pred = Iop_CmpLE32U;
+                                    break;
+                                case Ity_I64:
+                                    pred = Iop_CmpLE64U;
+                                    break;
+                                default:
+                                    errs() << "Parse failed!\n";
+                                    vassert(false);
+                                }
+                                break;
+                            case CmpInst::ICMP_SGT:
+                                errs() << "sgt ";
+
+                                break;
+                            case CmpInst::ICMP_SGE:
+                                errs() << "sge ";
+
+                                break;
+                            case CmpInst::ICMP_SLT:
+                                errs() << "slt ";
+
+                                switch (cmpTy) {
+                                case Ity_I32:
+                                    pred = Iop_CmpLT32S;
+                                    break;
+                                case Ity_I64:
+                                    pred = Iop_CmpLT64S;
+                                    break;
+                                default:
+                                    errs() << "Parse failed!\n";
+                                    vassert(false);
+                                }
+                                break;
+                            case CmpInst::ICMP_SLE:
+                                errs() << "sle ";
+
+                                switch (cmpTy) {
+                                case Ity_I32:
+                                    pred = Iop_CmpLE32S;
+                                    break;
+                                case Ity_I64:
+                                    pred = Iop_CmpLE64S;
+                                    break;
+                                default:
+                                    errs() << "Parse failed!\n";
+                                    vassert(false);
+                                }
+                                break;
                             default:
                                 errs() << "Parse failed!\n";
                                 vassert(false);
