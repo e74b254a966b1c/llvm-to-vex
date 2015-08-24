@@ -180,6 +180,7 @@ namespace {
                 if (isa<UnaryInstruction>(V)) {
                     errs() << "unary ";
 
+                    IROp op = Iop_INVALID;
                     Value *opd = I.getOperand(0);
                     IRExpr *parsedOpd = 0;
 
@@ -187,6 +188,8 @@ namespace {
                         errs() << "alloca ";
                     } else if (isa<CastInst>(V)) {
                         errs() << "cast ";
+
+                        IRType origTy = parseVType(*opd);
 
                         if (isa<AddrSpaceCastInst>(V)) {
                             errs() << "addr space ";
@@ -206,6 +209,69 @@ namespace {
                             errs() << "ptr to int ";
                         } else if (isa<SExtInst>(V)) {
                             errs() << "s ext ";
+
+                            switch (origTy) {
+                            case Ity_I8:
+                                errs() << "8 to ";
+
+                                switch (type) {
+                                case Ity_I16:
+                                    errs() << "16 ";
+
+                                    op = Iop_8Sto16;
+                                    break;
+                                case Ity_I32:
+                                    errs() << "32 ";
+
+                                    op = Iop_8Sto32;
+                                    break;
+                                case Ity_I64:
+                                    errs() << "64 ";
+
+                                    op = Iop_8Sto64;
+                                    break;
+                                default:
+                                    errs() << "Parse failed!\n";
+                                    vassert(false);
+                                }
+                                break;
+                            case Ity_I16:
+                                errs() << "16 to ";
+
+                                switch (type) {
+                                case Ity_I32:
+                                    errs() << "32";
+
+                                    op = Iop_16Sto32;
+                                    break;
+                                case Ity_I64:
+                                    errs() << "64";
+
+                                    op = Iop_16Sto64;
+                                    break;
+                                default:
+                                    errs() << "Parse failed!\n";
+                                    vassert(false);
+                                }
+                                break;
+                            case Ity_I32:
+                                errs() << "32 to ";
+
+                                switch (type) {
+                                case Ity_I64:
+                                    errs() << "64";
+
+                                    op = Iop_32Sto64;
+                                    break;
+                                default:
+                                    errs() << "Parse failed!\n";
+                                    vassert(false);
+                                break;
+                                }
+                            default:
+                                errs() << "Parse failed!\n";
+                                vassert(false);
+                            }
                         } else if (isa<SIToFPInst>(V)) {
                             errs() << "si to fp ";
                         } else if (isa<TruncInst>(V)) {
@@ -218,6 +284,11 @@ namespace {
                             errs() << "Parse failed!\n";
                             vassert(false);
                         }
+
+                        parsedOpd = parseVal(*opd, vl, level + 1);
+                        res = vl.newTemp(type);
+                        vl.assign(res, IRExpr_Unop(op, parsedOpd));
+                        expr = IRExpr_RdTmp(res);
                     } else if (isa<ExtractValueInst>(V)) {
                         errs() << "extract ";
                     } else if (isa<LoadInst>(V)) {
